@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://my.springframework.org/schema/integration"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://my.springframework.org/schema/integration"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<xsd:element name="channel">
+		<xsd:annotation>
+			<xsd:documentation>
+				Defines a Point-to-Point MessageChannel.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="channelType">
+					<xsd:sequence>
+						<xsd:choice minOccurs="0" maxOccurs="1">
+							<xsd:element name="queue" type="queueType">
+								<xsd:annotation>
+									<xsd:documentation>
+										Identifies this channel as a Queue style
+										channel
+									</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:choice>
+					</xsd:sequence>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="bridge">
+		<xsd:annotation>
+			<xsd:documentation>
+				Defines an endpoint that passes a Message to the
+				output-channel without
+				modifying it.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="id" type="xsd:string" />
+			<xsd:attributeGroup ref="inputOutputChannelGroup" />
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:complexType name="queueType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Defines a queue for messages. If 'capacity' is
+				specified, it will be a
+				bounded queue.
+				A custom Queue
+				implementation
+				can be injected using the 'ref'
+				attribute.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="capacity" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					Capacity for this queue. Default capacity is 0
+					which means
+					this queue will accumulate as many
+					messages as available
+					resources allow.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:element name="publish-subscribe-channel">
+		<xsd:annotation>
+			<xsd:documentation>
+				Defines a Publish-Subscribe channel that
+				broadcasts messages to its
+				subscribers.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="channelType">
+					<xsd:attribute name="task-executor" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+								Provides the reference to a bean that implements
+								org.springframework.core.task.TaskExecutor which is used
+								when dispatching Messages to this channel's subscribers.
+								Also, when using a TaskExecutor, keep in mind that any
+								transaction active for the sender will NOT propagate to
+								the handler invocation since the TaskExecutor dispatches
+								to the handler on a separate Thread. Usually configured
+								using the 'task' namespace support provided by Spring
+								(e.g., <task:executor/>).
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:complexType name="channelType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Defines a message channel.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="id" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:element name="gateway">
+		<xsd:annotation>
+			<xsd:documentation>
+				Defines a Messaging Gateway.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence minOccurs="0" maxOccurs="1">
+				<xsd:element name="method" minOccurs="0" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation>
+							<![CDATA[
+	Provides mechanism to define method per channel mappings for this gateway
+							]]>
+						</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:sequence>
+			<xsd:attribute name="id" type="xsd:string" use="optional" />
+			<xsd:attribute name="service-interface" type="xsd:string"
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>
+						<![CDATA[
+							The name of the interface which will be exposed by this gateway.
+						]]>
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="default-request-channel" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation>
+										<![CDATA[
+								Identifies default channel the messages will be sent to upon invocation of methods of this gateway
+										]]>
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="default-reply-channel" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation>
+										<![CDATA[
+								Identifies default channel this gateway will subscribe to to receive reply Messages, which will then be
+								converted to the return type of the method signature.
+										]]>
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+
+	<xsd:element name="service-activator">
+		<xsd:annotation>
+			<xsd:documentation>
+				Defines a Service Activator.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:annotation>
+				<xsd:documentation>
+					Base type for Service Activator endpoints.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:attribute name="id" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation>
+						'id' value:
+						- Identifies the underlying Spring
+						bean definition (AbstractEndpoint)
+						- as MessageHandler bean alias
+						together with suffix '.handler'
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="ref" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation>
+						A reference to a bean that implements the
+						handler.
+						The bean can be an implementation of the MessageHandler
+						interface or
+						a POJO
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="method" type="xsd:string" />
+			<xsd:attributeGroup ref="inputOutputChannelGroup" />
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:attributeGroup name="inputOutputChannelGroup">
+		<xsd:attribute name="output-channel" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>
+					Identifies the Message channel where Message will be sent after it's being
+					processed by this endpoint
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="input-channel" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>The receiving Message channel of this endpoint
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+</xsd:schema>

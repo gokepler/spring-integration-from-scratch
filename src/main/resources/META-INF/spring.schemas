@@ -1,0 +1,2 @@
+http\://my.springframework.org/schema/integration/my-spring-integration-1.0.xsd=my/springframework/integration/config/xml/my-spring-integration-1.0.xsd
+http\://my.springframework.org/schema/integration/my-spring-integration.xsd=my/springframework/integration/config/xml/my-spring-integration-1.0.xsd

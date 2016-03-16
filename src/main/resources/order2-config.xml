@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
-	xmlns="http://www.springframework.org/schema/integration"
+	xmlns="http://my.springframework.org/schema/integration"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:int-jms="http://www.springframework.org/schema/integration/jms"
 	xsi:schemaLocation="
-		http://www.springframework.org/schema/integration
-		http://www.springframework.org/schema/integration/spring-integration.xsd
-		http://www.springframework.org/schema/integration/jms
-		http://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd
+		http://my.springframework.org/schema/integration
+		http://my.springframework.org/schema/integration/my-spring-integration.xsd
 		http://www.springframework.org/schema/beans
 		http://www.springframework.org/schema/beans/spring-beans.xsd">
 
@@ -21,12 +18,12 @@
 
 	<publish-subscribe-channel id="newOrders" />
 
-	<service-activator input-channel="newOrders" ref="orderProcessor" />
+	<service-activator id="serviceActivator" input-channel="newOrders" ref="orderProcessor" />
 	
 	<channel id="pollableChannel">
 		<queue/>
 	</channel>
 	
-	<bridge input-channel="newOrders" output-channel="pollableChannel" />	
+	<bridge id="bridge" input-channel="newOrders" output-channel="pollableChannel" />	
 	
 </beans:beans>
