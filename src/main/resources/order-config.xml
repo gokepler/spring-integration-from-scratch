@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns="http://www.springframework.org/schema/integration"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int-jms="http://www.springframework.org/schema/integration/jms"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/integration
+		http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/integration/jms
+		http://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- App configuration -->
+	<beans:bean id="orderProcessor" class="order.OrderProcessor" />
+
+	<!-- JMS configuration -->
+
+	<beans:bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<beans:property name="brokerURL" value="vm://embedded?broker.persistent=false"/>
+	</beans:bean>
+
+	<beans:bean id="orderQueue" class="org.apache.activemq.command.ActiveMQQueue">
+		<beans:constructor-arg value="queue.orders"/>
+	</beans:bean>
+	
+	<beans:bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<beans:property name="connectionFactory" ref="connectionFactory" />
+	</beans:bean>
+	
+	<!-- Spring Integration configuration -->
+	
+	<gateway id="orderService" default-request-channel="newOrders"
+			 service-interface="order.OrderService" />
+
+	<publish-subscribe-channel id="newOrders" />
+
+	<service-activator input-channel="newOrders" ref="orderProcessor" />
+	
+	<int-jms:outbound-channel-adapter channel="newOrders" destination-name="queue.orders" />	
+	
+	
+	<!-- To check the message was being sent -->	
+	<beans:bean id="orderListener" class="order.OrderListener" />
+	
+	<beans:bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+	    <beans:property name="connectionFactory" ref="connectionFactory"/>
+	    <beans:property name="destination" ref="orderQueue"/>
+	    <beans:property name="messageListener" ref="orderListener" />
+	</beans:bean>
+	
+</beans:beans>
